@@ -1,13 +1,13 @@
-import { useContext } from "react";
+// import { useContext } from "react";
 import Dashboard from "../components/dashboard";
 import LatestCollection from "../components/LatestCollection";
-import { ShopContext } from "../context/ShopContext";
+// import { ShopContext } from "../context/ShopContext";
 import BestSeller from "../components/BestSeller";
 import OurPolicy from "../components/OurPolicy";
 import NewsLetterBox from "../components/NewsLetterBox";
 
 const Home = () => {
-  const { products } = useContext(ShopContext);
+  // const { products } = useContext(ShopContext);
   return (
     <div>
       <Dashboard />
