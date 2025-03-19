@@ -1,5 +1,5 @@
 // import { useContext } from "react";
-import Dashboard from "../components/dashboard";
+import Dashboard from "../components/Dashboard";
 import LatestCollection from "../components/LatestCollection";
 // import { ShopContext } from "../context/ShopContext";
 import BestSeller from "../components/BestSeller";
