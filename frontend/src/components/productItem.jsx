@@ -17,6 +17,7 @@ const ProductItem = ({ id, image, name, price }) => {
           {price}
         </p>
       </div>
+      <></>
     </Link>
   );
 };
