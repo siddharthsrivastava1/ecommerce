@@ -3,14 +3,23 @@ import { ShopContext } from "../context/ShopContext";
 import { assets } from "../assets/assets";
 import Title from "../components/Title";
 import ProductItem from "../components/ProductItem";
-
+import Pagination from "../components/Pagination";
 const Collection = () => {
-  const { products, search, showSearch } = useContext(ShopContext);
+  const {
+    productsCollection,
+    products,
+    search,
+    showSearch,
+    getCategoryData,
+    totalPages,
+    setPage,
+    page,
+  } = useContext(ShopContext);
   const [showFilter, setShowFilter] = useState(false);
   const [filterProducts, setFilterProducts] = useState([]);
   const [category, setCategory] = useState([]);
   const [subCategory, setSubCategory] = useState([]);
-  const [sortType, setSortType] = useState("relavent");
+  const [sortType, setSortType] = useState("low-high");
 
   const toggleCategory = (e) => {
     if (category.includes(e.target.value)) {
@@ -28,32 +37,46 @@ const Collection = () => {
     }
   };
 
-  const applyFilter = () => {
+  const applyFilter = (page, limit) => {
+    const data = { category: category, subcategory: subCategory, page, limit };
+    getCategoryData(data);
     let productsCopy = products.slice();
+    // sortProduct(productsCopy);
+    // if(totalPages)setPage(1);
+    // if (showSearch && search) {
+    //   productsCopy = productsCopy.filter((item) =>
+    //     item.name.toLowerCase().includes(search.toLowerCase())
+    //   );
+    // }
 
-    if (showSearch && search) {
-      productsCopy = productsCopy.filter((item) =>
-        item.name.toLowerCase().includes(search.toLowerCase())
-      );
+    // if (category.length > 0) {
+    //   productsCopy = productsCopy.filter((item) =>
+    //     category.includes(item.category)
+    //   );
+    // }
+
+    // if (subCategory.length > 0) {
+    //   productsCopy = productsCopy.filter((item) =>
+    //     subCategory.includes(item.subCategory)
+    //   );
+    // }
+    switch (sortType) {
+      case "low-high":
+        setFilterProducts(productsCopy.sort((a, b) => a.price - b.price));
+        break;
+
+      case "high-low":
+        setFilterProducts(productsCopy.sort((a, b) => b.price - a.price));
+        break;
+      default:
+        setFilterProducts(productsCopy);
+        break;
     }
-
-    if (category.length > 0) {
-      productsCopy = productsCopy.filter((item) =>
-        category.includes(item.category)
-      );
-    }
-
-    if (subCategory.length > 0) {
-      productsCopy = productsCopy.filter((item) =>
-        subCategory.includes(item.subCategory)
-      );
-    }
-
-    setFilterProducts(productsCopy);
+    // setFilterProducts(productsCopy);
   };
 
   const sortProduct = () => {
-    let fpCopy = filterProducts.slice();
+    let fpCopy = products.slice();
 
     switch (sortType) {
       case "low-high":
@@ -69,14 +92,33 @@ const Collection = () => {
         break;
     }
   };
-
+  useEffect(() => {
+    // let productsCopy = productsCollection.slice();
+    // setFilterProducts(productsCopy);
+    sortProduct();
+  }, [products]);
   useEffect(() => {
     applyFilter();
-  }, [category, subCategory, search, showSearch, products]);
+  }, [category, subCategory, search, showSearch]);
 
   useEffect(() => {
     sortProduct();
   }, [sortType]);
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setPage(newPage);
+      applyFilter(newPage, 3);
+    }
+  };
+
+  useEffect(
+    (Previous) => {
+      if (totalPages !== 0 && Previous !== totalPages) {
+        setPage(1);
+      }
+    },
+    [totalPages]
+  );
 
   return (
     <div className="flex flex-col sm:flex-row gap-1 sm:gap-10 pt-10 border-t">
@@ -178,7 +220,7 @@ const Collection = () => {
             onChange={(e) => setSortType(e.target.value)}
             className="border-2 border-gray-300 text-sm px-2"
           >
-            <option value="relavent">Sort by: Relavent</option>
+            {/* <option value="relavent">Sort by: Relavent</option> */}
             <option value="low-high">Sort by: Low to High</option>
             <option value="high-low">Sort by: High to Low</option>
           </select>
@@ -196,6 +238,16 @@ const Collection = () => {
             />
           ))}
         </div>
+
+        {totalPages === 0 ? (
+          "No Items"
+        ) : (
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+        )}
       </div>
     </div>
   );

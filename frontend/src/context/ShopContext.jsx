@@ -2,7 +2,7 @@ import { createContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-
+import { useLoader } from "../context/LoaderContext";
 export const ShopContext = createContext();
 
 const ShopContextProvider = (props) => {
@@ -14,6 +14,10 @@ const ShopContextProvider = (props) => {
   const [cartItems, setCartItems] = useState({});
   const [products, setProducts] = useState([]);
   const [token, setToken] = useState("");
+  const { showLoader, hideLoader } = useLoader();
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [productsCollection, setProductsCollection] = useState([]);
   const navigate = useNavigate();
 
   const addToCart = async (itemId, size) => {
@@ -37,19 +41,64 @@ const ShopContextProvider = (props) => {
     setCartItems(cartData);
 
     if (token) {
+      showLoader();
       try {
         await axios.post(
           backendUrl + "/api/cart/add",
           { itemId, size },
           { headers: { token } }
         );
+        hideLoader();
       } catch (error) {
+        hideLoader();
         console.log(error);
         toast.error(error.message);
       }
     }
   };
-
+  const getCategoryData = async (data) => {
+    showLoader();
+    try {
+      const response = await axios.post(backendUrl + "/api/product/filter", {
+        category: data.category,
+        subcategory: data.subcategory,
+        page: data.page || 1,
+        limit: data.limit || 3,
+      });
+      hideLoader();
+      if (response.data.success) {
+        setProducts(response.data.data.reverse());
+        setTotalPages(response.data.totalPages);
+      } else {
+        toast.error(response.data.message);
+      }
+    } catch (error) {
+      console.log(error);
+      hideLoader();
+      toast.error(error.message);
+    }
+  };
+  const getSortData = async (data) => {
+    showLoader();
+    try {
+      const response = await axios.post(backendUrl + "/api/product/sort", {
+        category: data.category,
+        subcategory: data.subcategory,
+        sort: "price",
+        order: data,
+      });
+      hideLoader();
+      if (response.data.success) {
+        setProducts(response.data.data.reverse());
+      } else {
+        toast.error(response.data.message);
+      }
+    } catch (error) {
+      console.log(error);
+      hideLoader();
+      toast.error(error.message);
+    }
+  };
   const getCartCount = () => {
     let totalCount = 0;
     for (const items in cartItems) {
@@ -70,15 +119,17 @@ const ShopContextProvider = (props) => {
     cartData[itemId][size] = quantity;
 
     setCartItems(cartData);
-
     if (token) {
+      showLoader();
       try {
         await axios.post(
           backendUrl + "/api/cart/update",
           { itemId, size, quantity },
           { headers: { token } }
         );
+        hideLoader();
       } catch (error) {
+        hideLoader();
         console.log(error);
         toast.error(error.message);
       }
@@ -100,51 +151,63 @@ const ShopContextProvider = (props) => {
     return totalAmount;
   };
 
-  const getProductsData = async () => {
+  const getProductsData = async (page, limit) => {
+    showLoader();
     try {
-      const response = await axios.get(backendUrl + "/api/product/list");
+      const response = await axios.get(
+        backendUrl + `/api/product/list?page=${page}&limit=${limit || 5}`
+      );
+      hideLoader();
       if (response.data.success) {
-        setProducts(response.data.products.reverse());
+        setProducts(response.data.data.reverse());
       } else {
         toast.error(response.data.message);
       }
     } catch (error) {
       console.log(error);
+      hideLoader();
       toast.error(error.message);
     }
   };
 
   const getUserCart = async (token) => {
+    showLoader();
     try {
       const response = await axios.post(
         backendUrl + "/api/cart/get",
         {},
         { headers: { token } }
       );
+      hideLoader();
       if (response.data.success) {
         setCartItems(response.data.cartData);
       }
     } catch (error) {
+      hideLoader();
       console.log(error);
       toast.error(error.message);
     }
   };
 
   useEffect(() => {
-    getProductsData();
+    getProductsData(1);
   }, []);
 
   useEffect(() => {
+    // showLoader();
     if (!token && localStorage.getItem("token")) {
       setToken(localStorage.getItem("token"));
       getUserCart(localStorage.getItem("token"));
+      // hideLoader();
     }
     if (token) {
+      // hideLoader();
       getUserCart(token);
     }
   }, [token]);
 
   const value = {
+    getCategoryData,
     products,
     currency,
     delivery_fee,
@@ -162,6 +225,11 @@ const ShopContextProvider = (props) => {
     backendUrl,
     setToken,
     token,
+    getProductsData,
+    totalPages,
+    setPage,
+    page,
+    productsCollection,
   };
 
   return (

@@ -11,7 +11,7 @@ const Footer = () => {
             Hello Hello Hello Hello Hello HelloHelloHello Hello HelloHelloc
           </p>
         </div>
-        <div>
+        {/* <div>
           <p className="text-xl font-medium mb-5">COMAPNY</p>
           <ul className="flex flex-col gap-1 text-gray-600">
             <li>Home</li>
@@ -19,7 +19,7 @@ const Footer = () => {
             <li>Delivery</li>
             <li>Privacy Policy</li>
           </ul>
-        </div>
+        </div> */}
         <div>
           <p className="text-xl font-medium mb-5">GET IN TOUCH</p>
           <ul className="flex flex-col gap-1 text-gray-600">

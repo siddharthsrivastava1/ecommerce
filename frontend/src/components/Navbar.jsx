@@ -1,6 +1,7 @@
-import React, { useContext, useState } from "react";
-import { assets } from "../assets/assets";
+import React, { useContext, useEffect, useState } from "react";
+import axios from "axios";
 import { Link, NavLink } from "react-router-dom";
+import { assets } from "../assets/assets";
 import { ShopContext } from "../context/ShopContext";
 
 const Navbar = () => {
@@ -21,6 +22,21 @@ const Navbar = () => {
     setToken("");
     setCartItems({});
   };
+  const [menuItems, setMenuItems] = useState([]);
+
+  useEffect(() => {
+    axios
+      .get("http://localhost:1337/api/menus?sort=order:asc")
+      .then((res) => {
+        // const items = res.data.data.map((item) => ({
+        //   id: item.id,
+        //   ...item.attributes,
+        // }));
+        // console.log("Menu items fetched:", items);
+        setMenuItems(res.data.data);
+      })
+      .catch((err) => console.error("Menu fetch failed:", err));
+  }, []);
 
   return (
     <div className="flex items-center justify-between py-5 font-medium">
@@ -29,26 +45,20 @@ const Navbar = () => {
       </Link>
 
       <ul className="hidden sm:flex gap-5 text-sm text-gray-700">
-        <NavLink to="/" className="flex flex-col items-center gap-1">
-          <p>HOME</p>
-          <hr className="w-2/4 border-none h-[1.5px] bg-gray-700 hidden" />
-        </NavLink>
-        <NavLink to="/collection" className="flex flex-col items-center gap-1">
-          <p>COLLECTION</p>
-          <hr className="w-2/4 border-none h-[1.5px] bg-gray-700 hidden" />
-        </NavLink>
-        <NavLink to="/about" className="flex flex-col items-center gap-1">
-          <p>ABOUT</p>
-          <hr className="w-2/4 border-none h-[1.5px] bg-gray-700 hidden" />
-        </NavLink>
-        <NavLink to="/contact" className="flex flex-col items-center gap-1">
-          <p>CONTACT</p>
-          <hr className="w-2/4 border-none h-[1.5px] bg-gray-700 hidden" />
-        </NavLink>
+        {menuItems.map((item) => (
+          <NavLink
+            key={item.id}
+            to={item.path}
+            className="flex flex-col items-center gap-1"
+          >
+            <p>{item.title?.toUpperCase()}</p>
+            <hr className="w-2/4 border-none h-[1.5px] bg-gray-700 hidden" />
+          </NavLink>
+        ))}
       </ul>
 
       <div className="flex items-center gap-6">
-        <img
+        {/* <img
           onClick={() => {
             setShowSearch(true);
             navigate("/collection");
@@ -56,7 +66,7 @@ const Navbar = () => {
           src={assets.search_icon}
           className="w-5 cursor-pointer"
           alt=""
-        />
+        /> */}
 
         <div className="group relative">
           <img
@@ -111,34 +121,16 @@ const Navbar = () => {
             <img className="h-4 rotate-180" src={assets.dropdown_icon} alt="" />
             <p>Back</p>
           </div>
-          <NavLink
-            onClick={() => setVisible(false)}
-            className="py-2 pl-6 border"
-            to="/"
-          >
-            HOME
-          </NavLink>
-          <NavLink
-            onClick={() => setVisible(false)}
-            className="py-2 pl-6 border"
-            to="/collection"
-          >
-            COLLECTION
-          </NavLink>
-          <NavLink
-            onClick={() => setVisible(false)}
-            className="py-2 pl-6 border"
-            to="/about"
-          >
-            ABOUT
-          </NavLink>
-          <NavLink
-            onClick={() => setVisible(false)}
-            className="py-2 pl-6 border"
-            to="/contact"
-          >
-            CONTACT
-          </NavLink>
+          {menuItems.map((item) => (
+            <NavLink
+              key={item.id}
+              to={item.path}
+              onClick={() => setVisible(false)}
+              className="py-2 pl-6 border"
+            >
+              {item.title?.toUpperCase()}
+            </NavLink>
+          ))}
         </div>
       </div>
     </div>

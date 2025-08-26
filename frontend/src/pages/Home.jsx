@@ -1,20 +1,25 @@
-// import { useContext } from "react";
+import { useContext } from "react";
 import Dashboard from "../components/Dashboard";
 import LatestCollection from "../components/LatestCollection";
-// import { ShopContext } from "../context/ShopContext";
+import { ShopContext } from "../context/ShopContext";
 import BestSeller from "../components/BestSeller";
 import OurPolicy from "../components/OurPolicy";
-import NewsLetterBox from "../components/NewsLetterBox";
+import { useEffect } from "react";
+// import NewsLetterBox from "../components/NewsLetterBox";
 
 const Home = () => {
-  // const { products } = useContext(ShopContext);
+  const { getProductsData } = useContext(ShopContext);
+  useEffect(() => {
+    getProductsData(1);
+  }, []);
+
   return (
     <div>
       <Dashboard />
       <LatestCollection />
       <BestSeller />
       <OurPolicy />
-      <NewsLetterBox />
+      {/* <NewsLetterBox /> */}
     </div>
   );
 };
